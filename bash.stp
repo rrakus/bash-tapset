@@ -1,10 +1,17 @@
 /* bash tapset
  * author: Roman Rakus <rrakus@redhat.com>
  * Needs systemtap newer then version 1.6
- * TODO: command types, convert to marks
  * How to compile?
  * make "CPPFLAGS=-D_GNU_SOURCE -DRECYCLES_PIDS -DSTAP_SDT_ARG_CONSTRAINT=r  `getconf LFS_CFLAGS`"
 */
+
+/*
+ * TODO
+ * command types, convert to marks
+ * child process fork/exec/wait
+ * child process job control - foregrounding, backgrounding, signaling
+ * work with variables
+ */
 
 /* arguments set by various probes
  * Just an indexed array
