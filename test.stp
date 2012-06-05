@@ -1,0 +1,104 @@
+/*
+probe bash* {
+  printf("%s\n", probestr)
+//  print_ustack(ubacktrace())
+}
+*/
+
+probe bash_function_call {
+  printf("%d: shell function call\n", pid())
+  printf("At line %d\n", line)
+  printf("Name: %s\n", name)
+  printf("Count of arguments: %d\n", argc)
+  printf("args:\n")
+  foreach (x in bash_args)
+    printf("[%d]'%s'\n", x, bash_args[x])
+  printf("\n-----------\n")
+}
+
+probe bash_builtin_call {
+  printf("%d: shell builtin call\n", pid())
+  printf("At line %d\n", line)
+  printf("Name: %s\n", name)
+  printf("Count of arguments: %d\n", argc)
+  printf("args:\n")
+  foreach (x in bash_args)
+    printf("[%d]'%s'\n", x, bash_args[x])
+  printf("\n-----------\n")
+}
+
+probe bash_command_call {
+  printf("Command call:\n")
+  str = null_command ? "Yes" : "No"
+  printf("Null command? %s\n", str)
+  printf("Type = %d\n", type)
+  printf("Line = %d\n", line)
+  printf("-----------\n")
+}
+
+probe bash_command_case_call {
+  printf("Case command call:\n")
+  printf("At line %d\n", line)
+  printf("case_word = %s\n", case_word)
+  printf("Causes list:\n")
+  foreach([x+,y] in bash_clauses)
+    printf("[%d][%d]'%s'\n", x, y, bash_clauses[x,y])
+  printf("-----------\n")
+
+}
+
+probe bash_command_for_call {
+  printf("For command call:\n")
+  printf("At line %d\n", line)
+  printf("Variable = %s\n", variable)
+  printf("Map list:\n")
+  foreach(x in bash_args)
+    printf("[%d]'%s'\n", x, bash_args[x])
+  printf("Action = %d\n", action_type)
+  printf("-----------\n")
+}
+
+probe bash_command_select_call {
+  printf("Select command call:\n")
+  printf("At line %d\n", line)
+
+  printf("Variable = %s\n", variable)
+  printf("Map list:\n")
+  foreach(x in bash_args)
+    printf("[%d]'%s'\n", x, bash_args[x])
+  printf("Action type = %d\n", action_type)
+
+  printf("-----------\n")
+}
+
+probe bash_parse {
+  printf("Parsing:\n")
+  printf("At line %d\n", line)
+  printf("string = %s\n", tokens)
+  printf("File = %s\n", file)
+  printf("-----------\n")
+}
+
+probe bash_command_while_call {
+  printf("While command call:\n")
+/*
+  printf("At line %d\n", line)
+*/
+  printf("-----------\n")
+}
+probe bash_command_if_call {
+  printf("If command call:\n")
+  printf("At line %d\n", line)
+  printf("-----------\n")
+}
+
+probe bash_command_simple_call
+{
+  printf("Simple command call:\n")
+//  printf("At line %d\n", line)
+//  printf("Count of arguments: %d\n", argc)
+//  printf("args:\n")
+//  foreach (x in bash_args)
+//    printf("[%d]'%s'\n", x, bash_args[x])
+//  printf("\n-----------\n")
+}
