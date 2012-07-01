@@ -1125,6 +1125,9 @@
 
 /* End additions for lib/intl */
 
+/* Define to 1 if using probes */
+#undef HAVE_SYSTEMTAP
+
 #include "config-bot.h"
 
 #endif /* _CONFIG_H_ */

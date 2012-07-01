@@ -430,9 +430,25 @@ HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
 	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
 	   execute_cmd.h parser.h pathexp.h pathnames.h pcomplete.h assoc.h \
-	   $(BASHINCFILES)
+	   $(BASHINCFILES) $(PROBES_H)
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
+
+# The tapset.
+TAPSET_SRCDIR=$(srcdir)/tapset
+
+# Probe point declarations.
+PROBES_SRC = @PROBES_SRC@
+PROBES_H = @PROBES_H@
+PROBES_O = @PROBES_O@
+DTRACE = @DTRACE@
+
+probes.h: probes.d
+	$(DTRACE) -C -h -s $< -o $@
+
+probes.o: probes.d
+	$(DTRACE) -C -G -s $< -o $@
+
 
 # header files chosen based on running of configure
 SIGNAMES_H = @SIGNAMES_H@
@@ -448,8 +464,9 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
 	   alias.o array.o arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
-	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
-	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
+	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o \
+           redir.o pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O) \
+           $(PROBES_O)
 
 # Where the source code of the shell builtins resides.
 BUILTIN_SRCDIR=$(srcdir)/builtins
