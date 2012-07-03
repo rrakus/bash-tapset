@@ -24,12 +24,12 @@ global bash_args
  */
 global bash_clauses
 
-probe bash_main_start = process("bash-probes").begin
+probe bash_main_start = process("bash").begin
 {
   probestr = sprintf("bash with pid %d started", pid())
 }
 
-probe bash_main_end = process("bash-probes").end
+probe bash_main_end = process("bash").end
 {
   probestr = sprintf("bash with pid %d ended", pid())
 }
@@ -43,21 +43,21 @@ probe bash_main_end = process("bash-probes").end
  * 10 = Arith, 11 = Cond, 12 = Arith_for, 13 = Subshell, 14 = Coproc
  * line = line number the command starts on
  */
-probe bash_command_call = process("bash-probes").function("execute_command")
+probe bash_command_call = process("bash").mark("execute_command")
 {
-  line=$line_number
+  line=$arg1
   type = -1
-  null_command = $command == 0x0
-  if ($command != 0x0)
-    type = $command->type
+  null_command = $arg2 == 0x0
+  if ($arg2 != 0x0)
+    type = $arg2->type
 }
 
-probe bash_command_select_call = process("bash-probes").function("execute_select_command")
+probe bash_command_select_call = process("bash").mark("execute_select_command")
 {
   delete bash_args
-  line=$line_number
-  variable = user_string($select_command->name->word)
-  words = $select_command->map_list
+  line=$arg1
+  variable = user_string($arg2->name->word)
+  words = $arg2->map_list
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -65,17 +65,14 @@ probe bash_command_select_call = process("bash-probes").function("execute_select
     bash_args[argc] = user_string(word)
     words = @cast(words, "WORD_LIST")->next
   }
-  action_type = $select_command->action->type
+  action_type = $arg2->action->type
 }
 
-probe bash_command_simple_call = process("bash-probes").function("execute_simple_command")
+probe bash_command_simple_call = process("bash").mark("execute_simple_command")
 {
   delete bash_args
-/* simple_command is optimized out! */
-/*
-  delete bash_args
-  words = $simple_command->words
-  line = $simple_command->line
+  words = $arg1->words
+  line = $arg1->line
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -83,16 +80,15 @@ probe bash_command_simple_call = process("bash-probes").function("execute_simple
     bash_args[argc] = user_string(word)
     words = @cast(words, "WORD_LIST")->next
   }
-*/
 }
 
-probe bash_command_if_call = process("bash-probes").function("execute_if_command")
+probe bash_command_if_call = process("bash").mark("execute_if_command")
 {
-  line=$line_number
+  line=$arg1
   /* Nothing? There are test, true_case and false_case COMMANDs */
 }
 
-probe bash_command_while_call = process("bash-probes").function("execute_while_or_until")
+probe bash_command_while_call = process("bash").mark("execute_while_or_until")
 {
   /* Nothing? There is test COMMAND and action COMMAND */
 }
@@ -102,12 +98,12 @@ probe bash_command_while_call = process("bash-probes").function("execute_while_o
  * case_word = a word which is tested
  * bash_clauses = 2D array of clauses to which is word tested
  */
-probe bash_command_case_call = process("bash-probes").function("execute_case_command")
+probe bash_command_case_call = process("bash").mark("execute_case_command")
 {
   delete bash_clauses
-  line=$line_number
-  case_word = user_string($case_command->word->word)
-  clause = $case_command->clauses
+  line=$arg1
+  case_word = user_string($arg2->word->word)
+  clause = $arg2->clauses
   clausec = -1
   while (clause != 0x0)
   {
@@ -130,13 +126,13 @@ probe bash_command_case_call = process("bash-probes").function("execute_case_com
  * args = The things to map over
  * action_type = The type of action to be done
  */
-probe bash_command_for_call = process("bash-probes").function("execute_for_command")
+probe bash_command_for_call = process("bash").mark("execute_for_command")
 {
   delete bash_args
-  line=$line_number
-  variable = user_string($for_command->name->word)
+  line=$arg1
+  variable = user_string($arg2->name->word)
   /* Word list, save them as args, use argc to count them */
-  words = $for_command->map_list
+  words = $arg2->map_list
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -144,17 +140,17 @@ probe bash_command_for_call = process("bash-probes").function("execute_for_comma
     bash_args[argc] = user_string(word)
     words = @cast(words, "WORD_LIST")->next
   }
-  action_type = $for_command->action->type
+  action_type = $arg2->action->type
 }
 
 /*
  * what is parsed?
  */
-probe bash_parse = process("bash-probes").function("parse_and_execute")
+probe bash_parse = process("bash").mark("parse_and_execute")
 {
-  line=$line_number
-  tokens = user_string($string)
-  file = user_string($from_file)
+  line=$arg1
+  tokens = user_string($arg2)
+  file = user_string($arg3)
 }
 
 /*
@@ -164,12 +160,12 @@ probe bash_parse = process("bash-probes").function("parse_and_execute")
  * bash_args = Array of arguments to function.
  * Keep in mind MAXSTRINGLEN. Arguments string can be longer.
  */
-probe bash_function_call = process("bash-probes").function("execute_function")
+probe bash_function_call = process("bash").mark("execute_function")
 {
   delete bash_args
-  line = $line_number
-  name = user_string($var->name)
-  words = $words
+  line = $arg1
+  name = user_string($arg2->name)
+  words = $arg3
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -186,12 +182,12 @@ probe bash_function_call = process("bash-probes").function("execute_function")
  * bash_args = Array of arguments to builtin
  * Keep in mind MAXSTRINGLEN. Arguments string can be longer.
  */
-probe bash_builtin_call = process("bash-probes").function("execute_builtin")
+probe bash_builtin_call = process("bash").mark("execute_builtin")
 {
   delete bash_args
-  line=$line_number
-  name = usymname($builtin)
-  words = $words
+  line=$arg1
+  name = usymname($arg2)
+  words = $arg3
   for(argc = -1; words != 0x0;)
   {
     argc++
