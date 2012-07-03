@@ -19,6 +19,7 @@
 */
 
 #include "config.h"
+#include "trace.h"
 
 #if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
   #pragma alloca
@@ -373,6 +374,7 @@ execute_command (command)
   struct fd_bitmap *bitmap;
   int result;
 
+  TRACE(BASH_EXECUTE_COMMAND(line_number, command));
   current_fds_to_close = (struct fd_bitmap *)NULL;
   bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
   begin_unwind_frame ("execute-command");
@@ -2416,6 +2418,7 @@ static int
 execute_for_command (for_command)
      FOR_COM *for_command;
 {
+  TRACE(BASH_EXECUTE_FOR_COMMAND(line_number, for_command));
   register WORD_LIST *releaser, *list;
   SHELL_VAR *v;
   char *identifier;
@@ -2900,6 +2903,7 @@ static int
 execute_select_command (select_command)
      SELECT_COM *select_command;
 {
+  TRACE(BASH_EXECUTE_SELECT_COMMAND(line_number, select_command));
   WORD_LIST *releaser, *list;
   SHELL_VAR *v;
   char *identifier, *ps3_prompt, *selection;
@@ -3038,6 +3042,7 @@ static int
 execute_case_command (case_command)
      CASE_COM *case_command;
 {
+  TRACE(BASH_EXECUTE_CASE_COMMAND(line_number, case_command));
   register WORD_LIST *list;
   WORD_LIST *wlist, *es;
   PATTERN_LIST *clauses;
@@ -3166,6 +3171,7 @@ execute_while_or_until (while_command, type)
      WHILE_COM *while_command;
      int type;
 {
+  TRACE(BASH_EXECUTE_WHILE_OR_UNTIL(line_number, while_command, type));
   int return_value, body_status;
 
   body_status = EXECUTION_SUCCESS;
@@ -3227,6 +3233,7 @@ static int
 execute_if_command (if_command)
      IF_COM *if_command;
 {
+  TRACE(BASH_EXECUTE_IF_COMMAND(line_number, if_command));
   int return_value, save_line_number;
 
   save_line_number = line_number;
@@ -3652,6 +3659,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
      int pipe_in, pipe_out, async;
      struct fd_bitmap *fds_to_close;
 {
+  TRACE(BASH_EXECUTE_SIMPLE_COMMAND(line_number, simple_command));
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
   int first_word_quoted, result, builtin_is_special, already_forked, dofork;
@@ -4037,6 +4045,7 @@ execute_builtin (builtin, words, flags, subshell)
      WORD_LIST *words;
      int flags, subshell;
 {
+  TRACE(BASH_EXECUTE_BUILTIN(line_number, builtin, words));
   int old_e_flag, result, eval_unwind;
   int isbltinenv;
   char *error_trap;
@@ -4143,6 +4152,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
      struct fd_bitmap *fds_to_close;
      int async, subshell;
 {
+  TRACE(BASH_EXECUTE_FUNCTION(line_number, var, words));
   int return_val, result;
   COMMAND *tc, *fc, *save_current;
   char *debug_trap, *error_trap, *return_trap;

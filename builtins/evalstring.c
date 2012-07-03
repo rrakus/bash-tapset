@@ -19,6 +19,7 @@
 */
 
 #include <config.h>
+#include "trace.h"
 
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
@@ -172,6 +173,7 @@ parse_and_execute (string, from_file, flags)
      const char *from_file;
      int flags;
 {
+  TRACE(BASH_PARSE_AND_EXECUTE(line_number, string, from_file));
   int code, lreset;
   volatile int should_jump_to_top_level, last_result;
   COMMAND *volatile command;
