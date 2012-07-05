@@ -49,15 +49,15 @@ probe bash_command_call = process("bash").mark("execute_command")
   type = -1
   null_command = $arg2 == 0x0
   if ($arg2 != 0x0)
-    type = $arg2->type
+    type = @cast($arg2, "COMMAND")->type
 }
 
 probe bash_command_select_call = process("bash").mark("execute_select_command")
 {
   delete bash_args
   line=$arg1
-  variable = user_string($arg2->name->word)
-  words = $arg2->map_list
+  variable = user_string(@cast($arg2, "SELECT_COM")->name->word)
+  words = @cast($arg2, "SELECT_COM")->map_list
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -65,14 +65,14 @@ probe bash_command_select_call = process("bash").mark("execute_select_command")
     bash_args[argc] = user_string(word)
     words = @cast(words, "WORD_LIST")->next
   }
-  action_type = $arg2->action->type
+  action_type = @cast($arg2, "SELECT_COM")->action->type
 }
 
 probe bash_command_simple_call = process("bash").mark("execute_simple_command")
 {
   delete bash_args
-  words = $arg1->words
-  line = $arg1->line
+  words = @cast($arg2, "SIMPLE_COM")->words
+  line = $arg1
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -102,8 +102,8 @@ probe bash_command_case_call = process("bash").mark("execute_case_command")
 {
   delete bash_clauses
   line=$arg1
-  case_word = user_string($arg2->word->word)
-  clause = $arg2->clauses
+  case_word = user_string(@cast($arg2, "CASE_COM")->word->word)
+  clause = @cast($arg2, "CASE_COM")->clauses
   clausec = -1
   while (clause != 0x0)
   {
@@ -130,9 +130,9 @@ probe bash_command_for_call = process("bash").mark("execute_for_command")
 {
   delete bash_args
   line=$arg1
-  variable = user_string($arg2->name->word)
+  variable = user_string(@cast($arg2, "FOR_COM")->name->word)
   /* Word list, save them as args, use argc to count them */
-  words = $arg2->map_list
+  words = @cast($arg2, "FOR_COM")->map_list
   for(argc = -1; words != 0x0;)
   {
     argc++
@@ -140,7 +140,7 @@ probe bash_command_for_call = process("bash").mark("execute_for_command")
     bash_args[argc] = user_string(word)
     words = @cast(words, "WORD_LIST")->next
   }
-  action_type = $arg2->action->type
+  action_type = @cast($arg2, "FOR_COM")->action->type
 }
 
 /*
@@ -164,7 +164,7 @@ probe bash_function_call = process("bash").mark("execute_function")
 {
   delete bash_args
   line = $arg1
-  name = user_string($arg2->name)
+  name = user_string(@cast($arg2, "SHELL_VAR")->name)
   words = $arg3
   for(argc = -1; words != 0x0;)
   {
