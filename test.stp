@@ -92,6 +92,15 @@ probe bash_command_if_call {
   printf("-----------\n")
 }
 
+probe bash_command_connection_call
+{
+  printf("Connection command call:\n")
+  printf("At line %d\n", line)
+  printf("command = %p\n", command)
+  printf("connector = %d (%c)\n", connector, connector)
+  printf("-----------\n")
+}
+
 probe bash_command_simple_call
 {
   printf("Simple command call:\n")

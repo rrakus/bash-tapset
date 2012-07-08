@@ -2266,6 +2266,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
+  TRACE(BASH_EXECUTE_CONNECTION(line_number, command));
   COMMAND *tc, *second;
   int ignore_return, exec_result, was_error_trap, invert;
   volatile int save_line_number;

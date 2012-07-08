@@ -8,6 +8,7 @@ provider bash {
 	probe execute_for_command(int line_number, FOR_COM *for_command);
 	probe execute_function(int line_number, SHELL_VAR *var, WORD_LIST *words);
 	probe execute_builtin(int line_number, sh_builtin_func_t *builtin, WORD_LIST *words);
+	probe execute_connection(int line_number, COMMAND* command);
 
 	probe parse_and_execute(int line_number, char *string, char *from_file);
 }

@@ -82,6 +82,20 @@ probe bash_command_simple_call = process("bash").mark("execute_simple_command")
   }
 }
 
+/*
+ * All connections
+ * line - line number where connection occurs
+ * command - command worked
+ * connector - type of connection - &, ;, |, AND_AND, OR_OR
+ */
+probe bash_command_connection_call = process("bash").mark("execute_connection")
+{
+  line=$arg1
+  command = $arg2
+  connector = @cast($arg2, "COMMAND")->value->Connection->connector
+}
+
+
 probe bash_command_if_call = process("bash").mark("execute_if_command")
 {
   line=$arg1
