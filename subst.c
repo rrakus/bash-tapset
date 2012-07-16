@@ -7922,7 +7922,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   /* State flags */
   int had_quoted_null;
-  int has_dollar_at;
+  int has_dollar_at, temp_has_dollar_at;
   int tflag;
   int pflags;			/* flags passed to param_expand */
 
@@ -8127,13 +8127,14 @@ add_string:
 	  if (expanded_something)
 	    *expanded_something = 1;
 
-	  has_dollar_at = 0;
+	  temp_has_dollar_at = 0;
 	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
 	  if (word->flags & W_NOSPLIT2)
 	    pflags |= PF_NOSPLIT2;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
-			       &has_dollar_at, &quoted_dollar_at,
+			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
+	  has_dollar_at += temp_has_dollar_at;
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -8150,6 +8151,14 @@ add_string:
 
 	  temp = tword->word;
 	  dispose_word_desc (tword);
+
+	  /* Kill quoted nulls; we will add them back at the end of
+	     expand_word_internal if nothing else in the string */
+	  if (had_quoted_null && temp && QUOTED_NULL (temp))
+	    {
+	      FREE (temp);
+	      temp = (char *)NULL;
+	    }
 
 	  goto add_string;
 	  break;
@@ -8266,9 +8275,10 @@ add_twochars:
 
 	      temp = (char *)NULL;
 
-	      has_dollar_at = 0;
+	      temp_has_dollar_at = 0;	/* XXX */
 	      /* Need to get W_HASQUOTEDNULL flag through this function. */
-	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &has_dollar_at, (int *)NULL);
+	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &temp_has_dollar_at, (int *)NULL);
+	      has_dollar_at += temp_has_dollar_at;
 
 	      if (list == &expand_word_error || list == &expand_word_fatal)
 		{
@@ -8555,7 +8565,7 @@ finished_with_string:
 	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
-      if (had_quoted_null)
+      if (had_quoted_null && QUOTED_NULL (istring))
 	tword->flags |= W_HASQUOTEDNULL;
       list = make_word_list (tword, (WORD_LIST *)NULL);
     }
@@ -8586,7 +8596,7 @@ finished_with_string:
 	    tword->flags |= W_NOGLOB;
 	  if (word->flags & W_NOEXPAND)
 	    tword->flags |= W_NOEXPAND;
-	  if (had_quoted_null)
+	  if (had_quoted_null && QUOTED_NULL (istring))
 	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	}
